@@ -142,8 +142,17 @@
       </div>
 
       <div class="row">
-        <label class="field" for="obsidianAttachmentFolder">Attachment folder (in vault)</label>
+        <label class="field" for="obsidianAttachmentFolder">Attachment folder (path template)</label>
         <input type="text" id="obsidianAttachmentFolder" placeholder="attachments" />
+        <div class="hint">
+          Variables, expanded from the active note:
+          <code>{notename}</code> (note name w/o extension),
+          <code>{notedir}</code> (note's folder),
+          <code>{notepath}</code> (full path w/o extension).<br />
+          Examples: <code>attachments</code> ·
+          <code>{notedir}/!assets/{notename}</code> ·
+          <code>{notedir}/attachments</code>
+        </div>
       </div>
 
       <div class="row">

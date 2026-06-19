@@ -67,10 +67,16 @@ async function sendToObsidian(pngBlob, srcUrl, cfg) {
   if (!cfg.obsidianToken) throw new Error("no API token set in options");
 
   const base = cfg.obsidianUrl.replace(/\/+$/, "");
-  const folder = cfg.obsidianAttachmentFolder.replace(/^\/+|\/+$/g, "");
+  const auth = { Authorization: "Bearer " + cfg.obsidianToken };
+  const template = cfg.obsidianAttachmentFolder || "";
+
+  // The folder template and/or the embed link may need the active note's path.
+  const needNote = /\{note/.test(template) || cfg.obsidianInsertLink;
+  const notePath = needNote ? await getActiveNotePath(base, auth) : null;
+
+  const folder = resolveFolder(template, notePath);
   const name = makeFilename(srcUrl);
   const vaultPath = (folder ? folder + "/" : "") + name;
-  const auth = { Authorization: "Bearer " + cfg.obsidianToken };
 
   // 1. Upload the image file into the vault.
   const put = await fetch(base + "/vault/" + encodePath(vaultPath), {
@@ -82,22 +88,49 @@ async function sendToObsidian(pngBlob, srcUrl, cfg) {
     throw new Error("upload " + put.status + " " + (await safeText(put)));
   }
 
-  // 2. Append an embed link to the currently active note.
+  // 2. Append an embed link (full path, so it resolves in any subfolder).
   if (cfg.obsidianInsertLink) {
     const post = await fetch(base + "/active/", {
       method: "POST",
       headers: { ...auth, "Content-Type": "text/markdown" },
-      body: "\n![[" + name + "]]\n",
+      body: "\n![[" + vaultPath + "]]\n",
     });
     if (!post.ok) {
-      const detail =
-        post.status === 404
-          ? "no active note — open one in Obsidian"
-          : post.status + " " + (await safeText(post));
-      throw new Error("saved file, but link failed: " + detail);
+      throw new Error("saved file, but link failed: " + post.status + " " + (await safeText(post)));
     }
   }
   return name;
+}
+
+// Reads the path of the note currently open in Obsidian (e.g. "Projects/art.md").
+async function getActiveNotePath(base, auth) {
+  const r = await fetch(base + "/active/", {
+    headers: { ...auth, Accept: "application/vnd.olrapi.note+json" },
+  });
+  if (r.status === 404) throw new Error("no active note — open one in Obsidian");
+  if (!r.ok) throw new Error("active note " + r.status + " " + (await safeText(r)));
+  const json = await r.json();
+  if (!json || !json.path) throw new Error("could not read active note path");
+  return json.path;
+}
+
+// Expands {notepath}/{notedir}/{notename} against the active note and
+// normalizes the result into a clean vault-relative folder path.
+function resolveFolder(template, notePath) {
+  let full = "";
+  let dir = "";
+  let name = "";
+  if (notePath) {
+    full = notePath.replace(/\.[^/.]+$/, ""); // drop extension
+    const slash = full.lastIndexOf("/");
+    dir = slash >= 0 ? full.slice(0, slash) : "";
+    name = slash >= 0 ? full.slice(slash + 1) : full;
+  }
+  const expanded = template
+    .replace(/\{notepath\}/g, full)
+    .replace(/\{notedir\}/g, dir)
+    .replace(/\{notename\}/g, name);
+  return expanded.split("/").filter(Boolean).join("/"); // collapse empty segments
 }
 
 function makeFilename(url) {

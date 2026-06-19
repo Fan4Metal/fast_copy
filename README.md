@@ -57,6 +57,26 @@ Now Ctrl+click on an image will: copy it to the clipboard *and* save it into the
 vault's attachment folder *and* append an `![[image]]` embed to the **currently
 active note**. (Open a note first — appending the link needs an active file.)
 
+### Attachment folder template
+
+The attachment-folder field is a template, expanded per the **active note** so
+attachments can live next to the note they belong to:
+
+| Variable      | Meaning                                   | Note `Projects/art.md` |
+| ------------- | ----------------------------------------- | ---------------------- |
+| `{notename}`  | note file name without extension          | `art`                  |
+| `{notedir}`   | folder containing the note                | `Projects`             |
+| `{notepath}`  | full note path without extension          | `Projects/art`         |
+
+Examples:
+
+- `attachments` → always `attachments/…` (a fixed folder).
+- `{notedir}/!assets/{notename}` → for `Projects/art.md` saves to
+  `Projects/!assets/art/…`.
+- `{notedir}/attachments` → an `attachments` folder beside each note.
+
+The embed link uses the full vault path, so it resolves regardless of subfolder.
+
 > Note: a browser extension cannot focus the Obsidian window and press Ctrl+V in
 > it. Writing to the vault over the Local REST API achieves the same result more
 > reliably.
