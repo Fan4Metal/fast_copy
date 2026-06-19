@@ -22,8 +22,11 @@
       p.sub { margin: 0 0 18px; opacity: 0.7; }
       .row { margin-bottom: 16px; }
       label.field { display: block; font-weight: 600; margin-bottom: 6px; }
-      select {
+      select,
+      input[type="text"],
+      input[type="password"] {
         width: 100%;
+        box-sizing: border-box;
         padding: 6px 8px;
         border-radius: 6px;
         border: 1px solid rgba(128, 128, 128, 0.5);
@@ -31,6 +34,14 @@
         color: inherit;
         font: inherit;
       }
+      code {
+        font-family: ui-monospace, monospace;
+        background: rgba(128, 128, 128, 0.18);
+        padding: 0 3px;
+        border-radius: 3px;
+      }
+      a { color: #2d8a3e; }
+      #obsidianFields.disabled { opacity: 0.45; pointer-events: none; }
       .check { display: flex; align-items: center; gap: 8px; font-weight: 600; }
       .check input { width: 16px; height: 16px; }
       .hint { font-weight: 400; opacity: 0.65; font-size: 12.5px; margin-top: 4px; }
@@ -85,6 +96,63 @@
         <input type="checkbox" id="showToast" />
         Show confirmation toast
       </label>
+    </div>
+
+    <hr />
+
+    <div class="row">
+      <label class="check">
+        <input type="checkbox" id="obsidianEnabled" />
+        Send to Obsidian (Local REST API)
+      </label>
+      <div class="hint">
+        Requires the
+        <a href="https://github.com/coddingtonbear/obsidian-local-rest-api" target="_blank"
+          >Local REST API</a
+        >
+        plugin. On copy, the image is saved to your vault and an
+        <code>![[…]]</code> embed is appended to the active note.
+      </div>
+    </div>
+
+    <div id="obsidianFields">
+      <div class="row">
+        <label class="field" for="obsidianUrl">Server URL</label>
+        <select id="obsidianUrlPreset">
+          <option value="http://127.0.0.1:27123">HTTP (http://127.0.0.1:27123)</option>
+          <option value="https://127.0.0.1:27124">HTTPS (https://127.0.0.1:27124)</option>
+          <option value="custom">Custom…</option>
+        </select>
+        <input
+          type="text"
+          id="obsidianUrl"
+          placeholder="http://127.0.0.1:27123"
+          style="margin-top: 6px"
+        />
+        <div class="hint">
+          Enable “Non-encrypted (HTTP) Server” in the plugin and use the HTTP
+          option — the browser rejects the plugin’s self-signed HTTPS cert.
+        </div>
+      </div>
+
+      <div class="row">
+        <label class="field" for="obsidianToken">API token</label>
+        <input type="password" id="obsidianToken" placeholder="paste plugin API key" />
+        <div class="hint">Copy it from the Local REST API plugin settings.</div>
+      </div>
+
+      <div class="row">
+        <label class="field" for="obsidianAttachmentFolder">Attachment folder (in vault)</label>
+        <input type="text" id="obsidianAttachmentFolder" placeholder="attachments" />
+      </div>
+
+      <div class="row">
+        <label class="check">
+          <input type="checkbox" id="obsidianInsertLink" />
+          Append embed link to active note
+        </label>
+        <div class="hint">Off = only save the file, don’t touch any note.</div>
+      </div>
     </div>
 
     <div id="status"></div>

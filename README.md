@@ -37,6 +37,30 @@ Click the extension's toolbar icon (or open it via `chrome://extensions` →
 
 Settings are stored in `chrome.storage.sync` and apply instantly without reload.
 
+## Send to Obsidian (optional)
+
+The extension can drop the image straight into your Obsidian vault — no manual
+paste — via the [Local REST API](https://github.com/coddingtonbear/obsidian-local-rest-api)
+community plugin.
+
+Setup:
+
+1. In Obsidian, install & enable the **Local REST API** plugin.
+2. In its settings, enable **"Enable Non-encrypted (HTTP) Server"** and copy the
+   **API Key**. (The default HTTPS server uses a self-signed certificate that the
+   browser rejects, so the plain-HTTP server on port `27123` is the practical
+   choice.)
+3. In Fast Copy's settings, turn on **Send to Obsidian**, choose the **HTTP**
+   server URL, paste the **API token**, and set your **attachment folder**.
+
+Now Ctrl+click on an image will: copy it to the clipboard *and* save it into the
+vault's attachment folder *and* append an `![[image]]` embed to the **currently
+active note**. (Open a note first — appending the link needs an active file.)
+
+> Note: a browser extension cannot focus the Obsidian window and press Ctrl+V in
+> it. Writing to the vault over the Local REST API achieves the same result more
+> reliably.
+
 ## How it works
 
 - `content.js` listens for Ctrl+left-click on images and writes the result to
@@ -58,7 +82,7 @@ Settings are stored in `chrome.storage.sync` and apply instantly without reload.
 | --------------- | -------------------------------------------------- |
 | `manifest.json` | Manifest V3 configuration                          |
 | `content.js`    | Click handler, clipboard write, toast UI           |
-| `background.js` | Image fetch + PNG conversion, opens settings       |
+| `background.js` | Image fetch + PNG conversion, Obsidian upload       |
 | `options.html`  | Settings page markup                               |
 | `options.js`    | Settings page logic (`chrome.storage.sync`)        |
 | `icons/`        | Toolbar icons (16/48/128 px)                       |

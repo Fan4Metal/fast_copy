@@ -5,6 +5,11 @@ const DEFAULTS = {
   copyUrlModifier: "none", // none | ctrl | alt | shift
   alsoCopyHtml: false,
   showToast: true,
+  obsidianEnabled: false,
+  obsidianUrl: "http://127.0.0.1:27123",
+  obsidianToken: "",
+  obsidianAttachmentFolder: "attachments",
+  obsidianInsertLink: true,
 };
 
 const els = {
@@ -12,8 +17,17 @@ const els = {
   copyUrlModifier: document.getElementById("copyUrlModifier"),
   alsoCopyHtml: document.getElementById("alsoCopyHtml"),
   showToast: document.getElementById("showToast"),
+  obsidianEnabled: document.getElementById("obsidianEnabled"),
+  obsidianUrl: document.getElementById("obsidianUrl"),
+  obsidianToken: document.getElementById("obsidianToken"),
+  obsidianAttachmentFolder: document.getElementById("obsidianAttachmentFolder"),
+  obsidianInsertLink: document.getElementById("obsidianInsertLink"),
 };
+const urlPreset = document.getElementById("obsidianUrlPreset");
+const obsidianFields = document.getElementById("obsidianFields");
 const statusEl = document.getElementById("status");
+
+const PRESETS = ["http://127.0.0.1:27123", "https://127.0.0.1:27124"];
 
 // Load saved settings into the form.
 chrome.storage.sync.get(DEFAULTS, (cfg) => {
@@ -21,7 +35,20 @@ chrome.storage.sync.get(DEFAULTS, (cfg) => {
   els.copyUrlModifier.value = cfg.copyUrlModifier;
   els.alsoCopyHtml.checked = cfg.alsoCopyHtml;
   els.showToast.checked = cfg.showToast;
+  els.obsidianEnabled.checked = cfg.obsidianEnabled;
+  els.obsidianUrl.value = cfg.obsidianUrl;
+  els.obsidianToken.value = cfg.obsidianToken;
+  els.obsidianAttachmentFolder.value = cfg.obsidianAttachmentFolder;
+  els.obsidianInsertLink.checked = cfg.obsidianInsertLink;
+  urlPreset.value = PRESETS.includes(cfg.obsidianUrl) ? cfg.obsidianUrl : "custom";
+  syncUi();
 });
+
+function syncUi() {
+  obsidianFields.classList.toggle("disabled", !els.obsidianEnabled.checked);
+  const custom = urlPreset.value === "custom";
+  els.obsidianUrl.style.display = custom ? "" : "none";
+}
 
 function save() {
   let urlMod = els.copyUrlModifier.value;
@@ -38,6 +65,12 @@ function save() {
       copyUrlModifier: urlMod,
       alsoCopyHtml: els.alsoCopyHtml.checked,
       showToast: els.showToast.checked,
+      obsidianEnabled: els.obsidianEnabled.checked,
+      obsidianUrl: els.obsidianUrl.value.trim() || DEFAULTS.obsidianUrl,
+      obsidianToken: els.obsidianToken.value.trim(),
+      obsidianAttachmentFolder:
+        els.obsidianAttachmentFolder.value.trim() || DEFAULTS.obsidianAttachmentFolder,
+      obsidianInsertLink: els.obsidianInsertLink.checked,
     },
     () => flash("Saved")
   );
@@ -52,6 +85,16 @@ function flash(text, isWarn) {
   timer = setTimeout(() => statusEl.classList.remove("show"), 1500);
 }
 
+// When a preset is picked, copy it into the URL field; "custom" reveals the field.
+urlPreset.addEventListener("change", () => {
+  if (urlPreset.value !== "custom") els.obsidianUrl.value = urlPreset.value;
+  syncUi();
+  save();
+});
+
 for (const el of Object.values(els)) {
-  el.addEventListener("change", save);
+  el.addEventListener("change", () => {
+    syncUi();
+    save();
+  });
 }

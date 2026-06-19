@@ -10,6 +10,11 @@
     copyUrlModifier: "none", // none | ctrl | alt | shift
     alsoCopyHtml: false,
     showToast: true,
+    obsidianEnabled: false,
+    obsidianUrl: "http://127.0.0.1:27123",
+    obsidianToken: "",
+    obsidianAttachmentFolder: "attachments",
+    obsidianInsertLink: true,
   };
 
   let cfg = { ...DEFAULTS };
@@ -97,10 +102,10 @@
   }
 
   function copyImage(url) {
-    // Pass a Promise<Blob> to ClipboardItem so the user gesture survives the
-    // async fetch/convert round trip.
-    const blobPromise = getPngBlob(url);
-    const items = { "image/png": blobPromise };
+    // Resolve image bytes (and any Obsidian result) once; feed the blob to the
+    // clipboard via a Promise so the user gesture survives the async round trip.
+    const fetchPromise = getImage(url);
+    const items = { "image/png": fetchPromise.then((r) => r.blob) };
 
     if (cfg.alsoCopyHtml && !url.startsWith("data:")) {
       const html = '<img src="' + escapeAttr(url) + '">';
@@ -109,8 +114,15 @@
 
     navigator.clipboard
       .write([new ClipboardItem(items)])
-      .then(() => toast("Image copied"))
+      .then(() => fetchPromise)
+      .then((r) => reportResult(r.obsidian))
       .catch((err) => fail(err));
+  }
+
+  function reportResult(obs) {
+    if (!obs) toast("Image copied");
+    else if (obs.ok) toast("Copied + sent to Obsidian");
+    else toast("Copied — Obsidian: " + obs.error, true);
   }
 
   function fail(err) {
@@ -118,8 +130,8 @@
     toast("Copy failed: " + ((err && err.message) || err), true);
   }
 
-  async function getPngBlob(url) {
-    if (url.startsWith("data:")) return dataUrlToBlob(url);
+  async function getImage(url) {
+    if (url.startsWith("data:")) return { blob: dataUrlToBlob(url) };
 
     const resp = await chrome.runtime.sendMessage({
       type: "FAST_COPY_FETCH_IMAGE",
@@ -128,7 +140,7 @@
     if (!resp || !resp.ok) {
       throw new Error((resp && resp.error) || "could not fetch image");
     }
-    return dataUrlToBlob(resp.dataUrl);
+    return { blob: dataUrlToBlob(resp.dataUrl), obsidian: resp.obsidian };
   }
 
   function dataUrlToBlob(dataUrl) {
