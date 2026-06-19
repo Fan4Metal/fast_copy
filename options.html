@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Fast Copy — Settings</title>
+    <style>
+      :root { color-scheme: light dark; }
+      body {
+        font: 14px/1.5 system-ui, sans-serif;
+        margin: 0;
+        padding: 20px 22px;
+        min-width: 320px;
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0 0 4px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      h1 img { width: 20px; height: 20px; }
+      p.sub { margin: 0 0 18px; opacity: 0.7; }
+      .row { margin-bottom: 16px; }
+      label.field { display: block; font-weight: 600; margin-bottom: 6px; }
+      select {
+        width: 100%;
+        padding: 6px 8px;
+        border-radius: 6px;
+        border: 1px solid rgba(128, 128, 128, 0.5);
+        background: transparent;
+        color: inherit;
+        font: inherit;
+      }
+      .check { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+      .check input { width: 16px; height: 16px; }
+      .hint { font-weight: 400; opacity: 0.65; font-size: 12.5px; margin-top: 4px; }
+      #status {
+        margin-top: 14px;
+        height: 18px;
+        color: #2d8a3e;
+        font-size: 12.5px;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      #status.show { opacity: 1; }
+      hr { border: none; border-top: 1px solid rgba(128,128,128,.25); margin: 18px 0; }
+    </style>
+  </head>
+  <body>
+    <h1><img src="icons/icon48.png" alt="" /> Fast Copy</h1>
+    <p class="sub">Copy images from any page to the clipboard.</p>
+
+    <div class="row">
+      <label class="field" for="copyImageModifier">Copy image — modifier + left click</label>
+      <select id="copyImageModifier">
+        <option value="ctrl">Ctrl</option>
+        <option value="alt">Alt</option>
+        <option value="shift">Shift</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label class="field" for="copyUrlModifier">Copy image URL (as text) — modifier + left click</label>
+      <select id="copyUrlModifier">
+        <option value="none">Disabled</option>
+        <option value="ctrl">Ctrl</option>
+        <option value="alt">Alt</option>
+        <option value="shift">Shift</option>
+      </select>
+      <div class="hint">Must differ from the image modifier above.</div>
+    </div>
+
+    <hr />
+
+    <div class="row">
+      <label class="check">
+        <input type="checkbox" id="alsoCopyHtml" />
+        Also copy as HTML &lt;img&gt;
+      </label>
+      <div class="hint">Lets you paste into rich editors (Gmail, Docs) keeping the image.</div>
+    </div>
+
+    <div class="row">
+      <label class="check">
+        <input type="checkbox" id="showToast" />
+        Show confirmation toast
+      </label>
+    </div>
+
+    <div id="status"></div>
+
+    <script src="options.js"></script>
+  </body>
+</html>

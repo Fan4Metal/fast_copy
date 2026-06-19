@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Fast Copy — Copy images by Ctrl+Click",
+  "version": "1.0.0",
+  "description": "Copy any image from a web page to the clipboard with Ctrl+Click.",
+  "permissions": ["clipboardWrite", "storage"],
+  "host_permissions": ["<all_urls>"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": false
+  },
+  "action": {
+    "default_title": "Fast Copy — settings"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle",
+      "all_frames": true
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
