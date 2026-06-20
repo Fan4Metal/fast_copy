@@ -3,7 +3,7 @@
 Расширение для браузеров на основе Chromium (Chrome, Edge, Brave, Opera) для
 копирования изображений с веб-страницы в буфер обмена.
 
-> 🇬🇧 English version: [README.md](README.md)
+*[English](README.md) · Русский*
 
 ## Как пользоваться
 

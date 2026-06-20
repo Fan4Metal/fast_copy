@@ -3,7 +3,7 @@
 Extension for chromium-based browsers (Chrome, Edge, Brave, Opera) to copy
 images from a web page to the clipboard.
 
-> 🇷🇺 Русская версия: [README.ru.md](README.ru.md)
+*English · [Русский](README.ru.md)*
 
 ## How to use
 
